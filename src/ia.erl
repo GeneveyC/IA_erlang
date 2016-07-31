@@ -1,6 +1,6 @@
 -module(ia).
 
--export([init/1, foreach3/4]).
+-export([foreach3/4]).
 -export([jouer_pc/4]).
 -export([jouer_pc_init/1]).
 -export([algo_min/5, algo_max/5]).
@@ -8,19 +8,12 @@
 -export([nb_series_diag_mont/2,nb_series_diag_desc/2]).
 -export([nb_series_ligne_horiz/6,nb_series_ligne_vert/6]).
 -export([verifier/1]).
-
 -export([return/1]).
 
-init(0) -> 
-	ok.
-
-%OK, renvoie les coup possible
-
-%Peut etre optimier en indiquant juste Grille, ligne, colonne
 foreach3(_, 0, _, L1) ->
 	L1;	
 
-%Peut etre optimier en indiquant juste Grille, ligne, colonne
+%Fonction qui renvoit la liste des coups a jouer
 foreach3(Grille, I, J, L1) ->
 	case verifier(Grille) of
 		{victoire, _} ->
@@ -41,10 +34,11 @@ foreach3(Grille, I, J, L1) ->
 			end
 	end.
 
-%retourne une Grille
+%Fonction qui retourne une Grille
 return(Grille) ->
 	Grille.
 
+%Fonction de lancement de l'IA
 jouer_pc_init(Grille) ->
 	L1=foreach3(Grille, 3, 3, []),
 	Coup = jouer_pc(Grille, L1, {0,0,0}, -1000),
@@ -96,7 +90,6 @@ algo_min(Grille, [], _, Min_val, _) ->
 algo_min(Grille, _, 0, _, _) ->
 	eval(Grille);
 
-%Voir si on transmet la valeur min :)
 algo_min(Grille, L, N, Min_val, Max_val) -> 
 	case verifier(Grille) of 
 		{victoire, _} ->
@@ -191,7 +184,6 @@ nb_series(Grille, Joueur) ->
 			nb_series_ligne_horiz(Grille, Joueur, 3, 3, 0, 0) + 
 				nb_series_ligne_vert(Grille, Joueur, 3, 3, 0, 0).
 
-%A revoir car je pense que c'est pas fonctionnel
 nb_series_diag_mont(Grille, J) ->
 	case Grille of
 		{_, _, J,
@@ -213,7 +205,6 @@ nb_series_diag_mont(Grille, J) ->
          true -> 0
 	end.
 
-%De meme pour cette function
 nb_series_diag_desc(Grille, J) ->
 	case Grille of
 		{J, _, _,
