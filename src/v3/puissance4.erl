@@ -54,28 +54,31 @@ jouer(Grille, manque) ->
 	%on modifie la grille courante
 	Grille_mod=setelement(Id, Grille, Colonne_mod),
 	io:format("Nouvelle Grille ~p~n",[Grille_mod]),
-	io:format("Nb de pion verticale : ~p~n",[getNbCasesVerticale(Grille_mod, Joueur, 7)]),
+	{Nb_j1, Nb_j2} = getNbCasesVerticale(Grille_mod, 7, {0, 0}),
+	io:format("Nb de pion verticale j1 : ~p~n",[Nb_j1]),
+	io:format("Nb de pion verticale j2 : ~p~n",[Nb_j2]),
 	jouer(Grille_mod, manque).
 
+%A CHANGER
+getNbCasesVerticale_by_col(_, 7, {Nb_j1, Nb_j2}) ->
+	{Nb_j1, Nb_j2};
 
 %A CHANGER
-getNbCasesVerticale_by_col(_, 0, _) ->
-	0;
-
-%A CHANGER
-getNbCasesVerticale_by_col(Col, Id, Joueur) ->
+getNbCasesVerticale_by_col(Col, Id, {Nb_j1, Nb_j2}) ->
 	case element(Id, Col) of
-		Joueur ->
-			1+getNbCasesVerticale_by_col(Col, Id-1, Joueur);
-		_ -> 
-			getNbCasesVerticale_by_col(Col, Id-1, Joueur)
+		o ->
+			getNbCasesVerticale_by_col(Col, Id+1, {Nb_j1+1, 0});
+		x -> 
+			getNbCasesVerticale_by_col(Col, Id+1, {0, Nb_j2+1});
+		_->
+			getNbCasesVerticale_by_col(Col, Id+1, {Nb_j1, Nb_j2})
 	end.
 
 %A CHANGER
-getNbCasesVerticale(_, _, 0) ->
-	0;
+getNbCasesVerticale(_, 0, {Nb_j1, Nb_j2}) ->
+	{Nb_j1, Nb_j2};
 
 %A CHANGER
-getNbCasesVerticale(Grille, Joueur, Id) ->
-	getNbCasesVerticale_by_col(element(Id, Grille), 6, Joueur)
-		+getNbCasesVerticale(Grille, Joueur, Id-1).
+getNbCasesVerticale(Grille, Id, {Nb_j1, Nb_j2}) ->
+	{Nb1, Nb2} = getNbCasesVerticale_by_col(element(Id, Grille), 1, {Nb_j1, Nb_j2}),
+	getNbCasesVerticale(Grille, Id-1, {Nb1, Nb2}).
