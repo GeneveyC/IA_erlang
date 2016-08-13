@@ -51,7 +51,15 @@ jouer() ->
     % avec L1C1 = Ligne 1, Colonne 1
     % L'atome "manque" indique a celle-ci qu'il n'y a pour l'instant aucune combinaison gagnante
  
- 
+jouer(_,ok) ->
+    io:format("~n"),
+    io:format("********************************~n"),
+    io:format("Aucun joueur n'a remporter la partie !~n",[]),
+    io:format("That's all folk !~n"),
+    io:format("********************************~n"),
+    io:format("~n"),
+    killingyourselftolive();
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                               %
 %               Fonction jouer(_,{victoire,Joueur}):                                            %
@@ -60,7 +68,6 @@ jouer() ->
 %               gagnante                                                                        %
 %                                                                                               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
 jouer(_,{victoire,Joueur}) ->
     io:format("~n"),
     io:format("********************************~n"),
@@ -110,7 +117,7 @@ jouer(Grille,manque) ->
     %io:format("Nouvelle Grille ~p~n",[NouvelleGrille]),
     % On affiche la nouvelle grille
 
-    NouvelleGrille2 = test:jouer_pc_init(NouvelleGrille),
+    NouvelleGrille2 = ia:jouer_pc_init(NouvelleGrille),
 
     io:format("Nouvelle Grille ~p~n",[NouvelleGrille2]),
 
