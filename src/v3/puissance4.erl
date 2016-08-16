@@ -12,7 +12,7 @@
 -export([getNbCasesDiagonale1/4,getNbCasesDiagonale1_desc/4,getNbCasesDiagonale1_mont/4]).
 -export([getNbCasesDiagonale2/4,getNbCasesDiagonale2_desc/4,getNbCasesDiagonale2_mont/4]).
 
--export([verifier/3]).
+-export([verifier/3,verifier_total/3]).
 -export([blacksabbath/0, killingyourselftolive/0]).
 
 gen_grid() ->
@@ -85,8 +85,11 @@ jouer(Grille, manque) ->
 	%on modifie la grille courante
 	Grille_mod=setelement(Id, Grille, Colonne_mod),
 	io:format("Nouvelle Grille ~p~n",[Grille_mod]),
-	%verifier(Grille_mod, Id, Idx),
-	jouer(Grille_mod, verifier(Grille_mod, Id, Idx)).
+
+	%On fait jouer l'ia
+	ia:jouer_pc_init(Grille_mod).
+
+	%jouer(Grille_mod, verifier(Grille_mod, Id, Idx)).
 
 %Ok, nickel
 getNbCasesVerticale_by_col(_, 7, {Nb_j1, Nb_j2}) ->
@@ -131,7 +134,7 @@ getNbCasesHorizontale_by_col(Col, Id_ligne, {Nb_j1, Nb_j2}) ->
 	end.
 
 %Ok, Nickel
-getNbCasesHorizontale(_, 7, _, {Nb_j1, Nb_j2}) ->
+getNbCasesHorizontale(_, 8, _, {Nb_j1, Nb_j2}) ->
 	{Nb_j1, Nb_j2};
 
 %Ok, Nickel
@@ -185,11 +188,11 @@ getNbCasesDiagonale1_desc(Grille, Id_Col, Id_ligne, {Nb_j1, Nb_j2}) ->
 	end.
 
 %Ok, Nickel
-getNbCasesDiagonale1_mont(_, _, 6, {Nb_j1, Nb_j2}) ->
+getNbCasesDiagonale1_mont(_, _, 7, {Nb_j1, Nb_j2}) ->
 	{Nb_j1, Nb_j2};
 
 %Ok, Nickel
-getNbCasesDiagonale1_mont(_, 7, _, {Nb_j1, Nb_j2}) ->
+getNbCasesDiagonale1_mont(_, 8, _, {Nb_j1, Nb_j2}) ->
 	{Nb_j1, Nb_j2};
 
 %Ok, Nickel
@@ -216,17 +219,21 @@ getNbCasesDiagonale1_mont(Grille, Id_Col, Id_ligne, {Nb_j1, Nb_j2}) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 getNbCasesDiagonale1(Grille, Id_Col, Id_ligne, {Nb_j1, Nb_j2}) ->
 	Col = element(Id_Col, Grille),
-	{Nbj1, Nbj2}=getNbCasesDiagonale_by_col(Col, Id_ligne, {Nb_j1, Nb_j2}),
-	%appel fonction desc
-	{Nbj11, Nbj22}=getNbCasesDiagonale1_desc(Grille, Id_Col-1, Id_ligne-1, {Nbj1, Nbj2}),
-	%appel fonction mont
-	{Nb_j1f, Nb_j2f}=getNbCasesDiagonale1_mont(Grille, Id_Col+1, Id_ligne+1, {Nbj11, Nbj22}),
-	return({Nb_j1f, Nb_j2f}).
+	case getNbCasesDiagonale_by_col(Col, Id_ligne, {Nb_j1, Nb_j2}) of
+		{Nbj1, Nbj2} ->
+			{Nbj11, Nbj22}=getNbCasesDiagonale1_desc(Grille, Id_Col-1, Id_ligne-1, {Nbj1, Nbj2}),
+			{Nb_j1f, Nb_j2f}=getNbCasesDiagonale1_mont(Grille, Id_Col+1, Id_ligne+1, {Nbj11, Nbj22}),
+			return({Nb_j1f, Nb_j2f});
+		false ->
+			{Nbj11, Nbj22}=getNbCasesDiagonale1_desc(Grille, Id_Col-1, Id_ligne-1, {Nb_j1, Nb_j2}),
+			{Nb_j1f, Nb_j2f}=getNbCasesDiagonale1_mont(Grille, Id_Col+1, Id_ligne+1, {Nbj11, Nbj22}),
+			return({Nb_j1f, Nb_j2f})
+	end.
 
 getNbCasesDiagonale2_desc(_, _, 0, {Nb_j1, Nb_j2}) ->
 	{Nb_j1, Nb_j2};
 
-getNbCasesDiagonale2_desc(_, 7, _, {Nb_j1, Nb_j2}) ->
+getNbCasesDiagonale2_desc(_, 8, _, {Nb_j1, Nb_j2}) ->
 	{Nb_j1, Nb_j2};
 
 getNbCasesDiagonale2_desc(Grille, Id_Col, Id_ligne, {Nb_j1, Nb_j2}) ->
@@ -238,7 +245,7 @@ getNbCasesDiagonale2_desc(Grille, Id_Col, Id_ligne, {Nb_j1, Nb_j2}) ->
 			{Nb_j1, Nb_j2}
 	end.
 
-getNbCasesDiagonale2_mont(_, _, 6, {Nb_j1, Nb_j2}) ->
+getNbCasesDiagonale2_mont(_, _, 7, {Nb_j1, Nb_j2}) ->
 	{Nb_j1, Nb_j2};
 
 getNbCasesDiagonale2_mont(_, 0, _, {Nb_j1, Nb_j2}) ->
@@ -255,12 +262,16 @@ getNbCasesDiagonale2_mont(Grille, Id_Col, Id_ligne, {Nb_j1, Nb_j2}) ->
 
 getNbCasesDiagonale2(Grille, Id_Col, Id_ligne, {Nb_j1, Nb_j2}) ->
 	Col = element(Id_Col, Grille),
-	{Nbj1, Nbj2}=getNbCasesDiagonale_by_col(Col, Id_ligne, {Nb_j1, Nb_j2}),
-	%appel fonction mont
-	{Nbj11, Nbj22}=getNbCasesDiagonale2_mont(Grille, Id_Col-1, Id_ligne+1, {Nbj1, Nbj2}),
-	%appel fonction desc
-	{Nb_j1f, Nb_j2f}=getNbCasesDiagonale2_desc(Grille, Id_Col+1, Id_ligne-1, {Nbj11, Nbj22}),
-	return({Nb_j1f, Nb_j2f}).
+	case getNbCasesDiagonale_by_col(Col, Id_ligne, {Nb_j1, Nb_j2}) of
+		{Nbj1, Nbj2} ->
+			{Nbj11, Nbj22}=getNbCasesDiagonale2_mont(Grille, Id_Col-1, Id_ligne+1, {Nbj1, Nbj2}),
+			{Nb_j1f, Nb_j2f}=getNbCasesDiagonale2_desc(Grille, Id_Col+1, Id_ligne-1, {Nbj11, Nbj22}),
+			return({Nb_j1f, Nb_j2f});
+		false ->
+			{Nbj11, Nbj22}=getNbCasesDiagonale2_mont(Grille, Id_Col-1, Id_ligne+1, {Nb_j1, Nb_j2}),
+			{Nb_j1f, Nb_j2f}=getNbCasesDiagonale2_desc(Grille, Id_Col+1, Id_ligne-1, {Nbj11, Nbj22}),
+			return({Nb_j1f, Nb_j2f})
+	end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                               %
@@ -276,17 +287,9 @@ getNbCasesDiagonale2(Grille, Id_Col, Id_ligne, {Nb_j1, Nb_j2}) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 verifier(Grille, Id_Col, Id_ligne) ->
 	{N1, N2} = getNbCasesVerticale(Grille, Id_Col, 1, {0, 0}),
-	%io:format("Nb de pion verticale j1 : ~p~n",[N1]),
-	%io:format("Nb de pion verticale j2 : ~p~n",[N2]),
 	{N3, N4} = getNbCasesHorizontale(Grille, 1, Id_ligne, {0,0}),
-	%io:format("Nb de pion horizontale j1 : ~p~n",[N3]),
-	%io:format("Nb de pion horizontale j2 : ~p~n",[N4]),
 	{N5, N6} = getNbCasesDiagonale1(Grille, Id_Col, Id_ligne, {0,0}),
-	%io:format("Nb de pion diagonale1 j1 : ~p~n",[N5]),
-	%io:format("Nb de pion diagonale1 j2 : ~p~n",[N6]),
 	{N7, N8} = getNbCasesDiagonale2(Grille, Id_Col, Id_ligne, {0,0}),
-	%io:format("Nb de pion diagonale2 j1 : ~p~n",[N7]),
-	%io:format("Nb de pion diagonale2 j2 : ~p~n",[N8]),
 
 	if
 		N1>=4 -> {victoire, o};
@@ -299,6 +302,41 @@ verifier(Grille, Id_Col, Id_ligne) ->
 		N8>=4 -> {victoire, x};
 		true -> manque
 	end.
+
+setScore(Val, Res) ->
+	case Val of
+		1 ->
+			1;
+		2 ->
+			5;
+		3 ->
+			50;
+		4 -> 
+			1000;
+		_ ->
+			Res
+	end.
+
+getScore([], Nb_j) ->
+	Nb_j;
+
+getScore(L, Nb_j) ->
+	[L1|LR] = L,
+	Nb_j1 = setScore(L1, Nb_j),
+	getScore(LR, Nb_j1).
+
+verifier_total(Grille, Id_Col, Id_ligne) ->
+	{N1, N2} = getNbCasesVerticale(Grille, Id_Col, 1, {0, 0}),
+	{N3, N4} = getNbCasesHorizontale(Grille, 1, Id_ligne, {0,0}),
+	{N5, N6} = getNbCasesDiagonale1(Grille, Id_Col, Id_ligne, {0,0}),
+	{N7, N8} = getNbCasesDiagonale2(Grille, Id_Col, Id_ligne, {0,0}),
+	
+	L1=[N1,N3,N5,N7],
+	L2=[N2,N4,N6,N8],
+
+	Nb_j1 = getScore(L1, 0),
+	Nb_j2 = getScore(L2, 0),
+	return({Nb_j1, Nb_j2}).
 
 killingyourselftolive() ->
     Pid = spawn (?MODULE, blacksabbath, []),
