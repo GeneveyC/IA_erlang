@@ -2,8 +2,10 @@
 
 -export([foreach_init/1,foreach/5,getValues_by_line/2,return/1]).
 -export([jouer_pc_init/1,jouer_pc/4]).
--export([algo_min/6,algo_max/6]).
--export([evaluation/1, evaluer/1, eval/4]).
+-export([algo_min/7,algo_max/7]).
+-export([evaluation/2, evaluer/1, eval/4]).
+
+-export([joueur_suivant/1]).
 
 getValues_by_line(_, 0) ->
 	false;
@@ -103,7 +105,7 @@ jouer_pc(Grille, L, Coup, Max_val) ->
 	%On recupere l'etat du jeux
 	Etat = puissance4:verifier(Grille_mod, Id_Col, Idx),
 
-	Val = algo_min(Grille_mod, L2, 5, 1000, -1000, Etat),
+	Val = algo_min(Grille_mod, joueur_suivant(Joueur), L2, 5, 1000, -1000, Etat),
 	io:format("[Val] : ~p~n",[Val]),
 
 	if Val > Max_val ->
@@ -117,17 +119,17 @@ jouer_pc(Grille, L, Coup, Max_val) ->
 	jouer_pc(Grille, LR, Meilleur_coup, Max_val2).
 
 
-algo_min(Grille, _, _, _, _, {victoire, _}) ->
-	evaluation(Grille);
+algo_min(Grille, Joueur, _, _, _, _, {victoire, _}) ->
+	evaluation(Grille, Joueur);
 
-algo_min(_, [], _, Min_val, _, manque) ->
+algo_min(_, _, [], _, Min_val, _, manque) ->
 	Min_val;
 
-algo_min(Grille, [], _, _, _, {victoire, _}) ->
-	evaluation(Grille);
+algo_min(Grille, Joueur, [], _, _, _, {victoire, _}) ->
+	evaluation(Grille, Joueur);
 
-algo_min(Grille, _, 0, _, _, _) ->
-	evaluation(Grille);
+algo_min(Grille, Joueur, _, 0, _, _, _) ->
+	evaluation(Grille, Joueur);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                               %
@@ -135,6 +137,7 @@ algo_min(Grille, _, 0, _, _, _) ->
 %               la fonction de l'algo min :														%
 %					param :																		%
 %						Grille -> la grille de jeux												%
+%						Joueur : Joueur courant
 %						L : liste des coups a jouer 											%
 %						N : Profondeur du jeux													%
 %						Min: Valeur mininmale													%
@@ -144,10 +147,10 @@ algo_min(Grille, _, 0, _, _, _) ->
 %						retourne la plus petit valeur de ces fils                               %
 %                                                                                               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-algo_min(Grille, L, N, Min_val, Max_val, Etat) -> 
+algo_min(Grille, Joueur, L, N, Min_val, Max_val, Etat) -> 
 	case Etat of 
 		{victoire, _} ->
-				evaluation(Grille);
+				evaluation(Grille, Joueur);
 		manque ->
 			[L1|LR] = L,
 			Joueur = o,
@@ -173,26 +176,26 @@ algo_min(Grille, L, N, Min_val, Max_val, Etat) ->
 			%On recupere l'etat du jeux
 			Etat2 = puissance4:verifier(Grille_mod, Id_Col, Idx),
 
-			Val = algo_max(Grille_mod, L2, N-1, Min_val, Max_val, Etat2),
+			Val = algo_max(Grille_mod, joueur_suivant(Joueur), L2, N-1, Min_val, Max_val, Etat2),
 
 			if Val < Min_val ->
-				algo_min(Grille, LR, N, Val, Max_val, Etat);
+				algo_min(Grille, Joueur, LR, N, Val, Max_val, Etat);
 			true ->
-				algo_min(Grille, LR, N, Min_val, Max_val, Etat)
+				algo_min(Grille, Joueur, LR, N, Min_val, Max_val, Etat)
 			end
 	end.
 
-algo_max(Grille, _, _, _, _, {victoire, _}) ->
-	evaluation(Grille);
+algo_max(Grille, Joueur, _, _, _, _, {victoire, _}) ->
+	evaluation(Grille, Joueur);
 
-algo_max(_, [], _, _, Max_val, manque) ->
+algo_max(_, _, [], _, _, Max_val, manque) ->
 	Max_val;
 
-algo_max(Grille, [], _, _, _, {victoire, _}) ->
-	evaluation(Grille);
+algo_max(Grille, Joueur, [], _, _, _, {victoire, _}) ->
+	evaluation(Grille, Joueur);
 
-algo_max(Grille, _, 0, _, _, _) ->
-	evaluation(Grille);
+algo_max(Grille, Joueur, _, 0, _, _, _) ->
+	evaluation(Grille, Joueur);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                                                                               %
@@ -200,6 +203,7 @@ algo_max(Grille, _, 0, _, _, _) ->
 %               la fonction de l'algo min :														%
 %					param :																		%
 %						Grille -> la grille de jeux												%
+%						Joueur : Joueur courant
 %						L : liste des coups a jouer 											%
 %						N : Profondeur du jeux													%
 %						Min: Valeur mininmale													%
@@ -209,10 +213,10 @@ algo_max(Grille, _, 0, _, _, _) ->
 %						retourne la plus grande valeur de ces fils                              %
 %                                                                                               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-algo_max(Grille, L, N, Min_val, Max_val, Etat) ->
+algo_max(Grille, Joueur, L, N, Min_val, Max_val, Etat) ->
 	case Etat of
 		{victoire, _} ->
-			evaluation(Grille);
+			evaluation(Grille, Joueur);
 		manque ->
 			[L1|LR] = L,
 
@@ -237,12 +241,12 @@ algo_max(Grille, L, N, Min_val, Max_val, Etat) ->
 			%On recupere l'etat du jeux
 			Etat2 = puissance4:verifier(Grille_mod, Id_Col, Idx),
 
-			Val = algo_min(Grille_mod, L2, N-1, Min_val, Max_val, Etat2),
+			Val = algo_min(Grille_mod, joueur_suivant(Joueur), L2, N-1, Min_val, Max_val, Etat2),
 
 			if Val > Max_val ->
-				algo_max(Grille, LR, N, Min_val, Val, Etat);				
+				algo_max(Grille, Joueur, LR, N, Min_val, Val, Etat);				
 			true ->
-				algo_max(Grille, LR, N, Min_val, Max_val, Etat)
+				algo_max(Grille, Joueur, LR, N, Min_val, Max_val, Etat)
 			end
 	end.
 
@@ -258,10 +262,23 @@ eval(Grille, Id_Col, Id_ligne, {Res_j1, Res_j2}) ->
 			eval(Grille, Id_Col, Id_ligne+1, {Res_j1+Nb_j1, Res_j2+Nb_j2})
 	end.
 
-evaluation(Grille) ->
+evaluation(Grille, Joueur) ->
 	{O, X} = evaluer(Grille),
-	return(O-X).
+	case Joueur of
+		o ->
+			return(O-X);
+		x ->
+			return(X-O)
+	end.
 
 evaluer(Grille) ->
 	{Nb_o, Nb_x} = eval(Grille, 1, 1, {0, 0}),
 	return({Nb_o, Nb_x}).
+
+joueur_suivant(Joueur) ->
+	case Joueur of
+		o ->
+			x;
+		x ->
+			o
+	end.
