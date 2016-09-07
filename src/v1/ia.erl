@@ -1,6 +1,6 @@
 -module(ia).
 
--export([foreach3/4]).
+-export([foreach/4]).
 -export([jouer_pc/4]).
 -export([jouer_pc_init/1]).
 -export([algo_min/5, algo_max/5]).
@@ -10,26 +10,25 @@
 -export([verifier/1]).
 -export([return/1]).
 
-foreach3(_, 0, _, L1) ->
+%Fonction qui renvoit la liste des coups a jouer
+foreach(_, 0, _, L1) ->
 	L1;	
 
-%Fonction qui renvoit la liste des coups a jouer
-foreach3(Grille, I, J, L1) ->
+foreach(Grille, I, J, L1) ->
 	case verifier(Grille) of
 		{victoire, _} ->
 			[];
 		manque ->
 			if J == 0 ->
-				foreach3(Grille, I-1, 3, L1);
+				foreach(Grille, I-1, 3, L1);
 			true ->
 				Id = (I-1)*3+J,
 				if element(Id, Grille) == 0 ->
 		            Coup = {0, I, J},
-		            %Append list
 		            L2 = [Coup|L1], 
-		            foreach3(Grille, I, J-1, L2);
+		            foreach(Grille, I, J-1, L2);
 				true ->
-					foreach3(Grille, I, J-1, L1)			
+					foreach(Grille, I, J-1, L1)			
 				end
 			end
 	end.
@@ -40,7 +39,7 @@ return(Grille) ->
 
 %Fonction de lancement de l'IA
 jouer_pc_init(Grille) ->
-	L1=foreach3(Grille, 3, 3, []),
+	L1=foreach(Grille, 3, 3, []),
 	Coup = jouer_pc(Grille, L1, {0,0,0}, -1000),
 	Joueur = x,
 	Ligne = element(2, Coup),
@@ -66,7 +65,7 @@ jouer_pc(Grille, L, Coup, Max_val) ->
 	NouvelleGrille = setelement((Ligne - 1) * 3 + Colonne, Grille, Joueur),
 
 	%recherche des nouveaux coup a jouer
-	L2 = foreach3(NouvelleGrille, 3, 3, LVIDE),
+	L2 = foreach(NouvelleGrille, 3, 3, LVIDE),
 	Val = algo_min(NouvelleGrille, L2, 9, 1000, -1000),
 
 	if Val > Max_val ->
@@ -104,7 +103,7 @@ algo_min(Grille, L, N, Min_val, Max_val) ->
 		
 			%simuler le coup
 			NouvelleGrille = setelement((Ligne - 1) * 3 + Colonne, Grille, Joueur),
-			L2 = foreach3(NouvelleGrille, 3, 3, LVIDE),
+			L2 = foreach(NouvelleGrille, 3, 3, LVIDE),
 
 			Val = algo_max(NouvelleGrille, L2, N-1, Min_val, Max_val),
 
@@ -141,7 +140,7 @@ algo_max(Grille, L, N, Min_val, Max_val) ->
 			
 			%simuler le coup
 			NouvelleGrille = setelement((Ligne - 1) * 3 + Colonne, Grille, Joueur),
-			L2 = foreach3(NouvelleGrille, 3, 3, LVIDE),
+			L2 = foreach(NouvelleGrille, 3, 3, LVIDE),
 
 			Val = algo_min(NouvelleGrille, L2, N-1, Min_val, Max_val),
 

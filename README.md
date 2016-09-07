@@ -8,4 +8,4 @@ l'intelligence artificielle a été crée par moi, par contre le jeux du morpion
 *	V1 : Jeux du morpion avec une IA de type min-max
 *	V2 : Jeux du morpion avec une IA de type Alpha-Beta
 *	V3 : Jeux du puissance4 (seulement en player vs player) 
-*	V4 : Creation d'un arbre de jeux
+*	V4 : Creation d'une IA qui peut jouer a n'importe quel jeux tour-par-tour

@@ -105,7 +105,7 @@ jouer_pc(Grille, L, Coup, Max_val) ->
 	%On recupere l'etat du jeux
 	Etat = puissance4:verifier(Grille_mod, Id_Col, Idx),
 
-	Val = algo_min(Grille_mod, joueur_suivant(Joueur), L2, 5, 1000, -1000, Etat),
+	Val = algo_min(Grille_mod, joueur_suivant(Joueur), L2, 6, 1000, -1000, Etat),
 	io:format("[Val] : ~p~n",[Val]),
 
 	if Val > Max_val ->

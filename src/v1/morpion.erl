@@ -24,7 +24,6 @@
  
 -export([jouer/2]).
 -export([jouer/0]).
-
 -export([verifier/1]).
 -export([blacksabbath/0, killingyourselftolive/0]).
  
